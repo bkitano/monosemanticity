@@ -84,7 +84,7 @@ Across:
 Via:
 > "Numerical proxies that represent the log-likelihood ratio of a string under the hypothesis vs under the full empirical distribution of the dataset."
 $$
-\log \left( \frac{P(s \, | \, \text{context})}{P(s)} \right) 
+c(\text{s}, \text{context}) = \log \left( \frac{P(s \, | \, \text{context})}{P(s)} \right) 
 $$
 
 ### Example proxy: a string of DNA, `gtcact`.
@@ -102,10 +102,18 @@ Note that we can't actually approximate the prior of $P(\text{DNA})$ (lol).
 
 So our proxy score is then
 $$
-\log \left( \frac{P(s \, | \, \text{DNA})}{P(s)} \right) = \log \left( \frac{\left( \frac{1}{4} \right)^6}{\left(\frac{1}{\text{|tokens|}}\right)^{6}} \right) = 6 \log \left( \frac{\text{|tokens|}}{4} \right),
+c(\text{gtcact}, \text{DNA}) = \log \left( \frac{P(s \, | \, \text{DNA})}{P(s)} \right) = \log \left( \frac{\left( \frac{1}{4} \right)^6}{\left(\frac{1}{\text{|tokens|}}\right)^{6}} \right) = 6 \log \left( \frac{\text{|tokens|}}{4} \right),
 $$
 
-and since $|\text{tokens}| >> 4$, this is a large positive number.
+and since $|\text{tokens}| >> 4$, this is a positive number.
+
+Now if the string were not DNA, eg `hello`, then $P(s \, | \, \text{DNA}) = 0$, then
+$$
+c(\text{hello}, \text{DNA}) = \log 0 = -\infty,
+$$
+
+so we're going to want to clamp strings that are impermissible under the context.
+
 
 #### Activation Specificity
 
