@@ -83,15 +83,18 @@ Across:
 
 Via:
 > "Numerical proxies that represent the log-likelihood ratio of a string under the hypothesis vs under the full empirical distribution of the dataset."
+
 $$
 c(\text{s}, \text{context}) = \log \left( \frac{P(s \, | \, \text{context})}{P(s)} \right) 
 $$
 
 ### Example proxy: a string of DNA, `gtcact`.
 - $P(\text{gtcact})$ is the full empirical distribution, which we could model as a uniform distribution over the number of tokens, ie 
+
 $$
 P(s) = \left(\frac{1}{\text{|tokens|}}\right)^{6}
 $$
+
 - $P(\text{gtcact} \, | \, \text{context})$ is the likelihood of the string given that the context the string was generated under was DNA, ie (under naive conditions)
 
 $$
@@ -101,6 +104,7 @@ $$
 Note that we can't actually approximate the prior of $P(\text{DNA})$ (lol).
 
 So our proxy score is then
+
 $$
 c(\text{gtcact}, \text{DNA}) = \log \left( \frac{P(s \, | \, \text{DNA})}{P(s)} \right) = \log \left( \frac{\left( \frac{1}{4} \right)^6}{\left(\frac{1}{\text{|tokens|}}\right)^{6}} \right) = 6 \log \left( \frac{\text{|tokens|}}{4} \right),
 $$
@@ -108,6 +112,7 @@ $$
 and since $|\text{tokens}| >> 4$, this is a positive number.
 
 Now if the string were not DNA, eg `hello`, then $P(s \, | \, \text{DNA}) = 0$, then
+
 $$
 c(\text{hello}, \text{DNA}) = \log 0 = -\infty,
 $$
