@@ -49,6 +49,40 @@ Specs (from [Problem Setup](https://transformer-circuits.pub/2023/monosemantic-f
 | **Loss** | MSE + L1 to encourage sparsity |
 | **Samples** | 8 billion |
 
+### Diagram
+
+It's a sparse autoencoder, so it's actually rather simple. Since the goal is for the sparse representation to *over-complete* the latent features (aka, learning the monosemantic representations), the encoded representation $h_j$ must be much larger than the original MLP output layer $x_j$. In the original paper, the MLP output size $m$ is 512 and the hidden size (aka the number of monosemantic features $i$) is ablated across 8x-256x (4096 - 131072).
+
+#### The encoder
+
+$$ 
+h_j = \text{ReLU}(W_{\text{up}}^T x_j + b_{\text{up}})
+$$
+
+where $W_{\text{up}}$ is the encoder weight matrix and $b_{\text{up}}$ is the encoder bias vector.
+
+| | **shape** |
+|-|-|
+| $x_j$ | ($m$, 1) |
+| $W_{\text{up}}$ | ($m$, $i$) |
+| $b_{\text{up}}$ | ($i$, 1) |
+
+#### The decoder
+
+$$
+\hat x_j = W_{\text{down}}^T h_j + b_{\text{down}}
+$$
+
+where $W_{\text{down}}$ is the decoder weight matrix and $b_{\text{down}}$ is the decoder bias vector.
+
+| | **shape** |
+|-|-|
+| $h_j$ | ($i$, 1) |
+| $W_{\text{down}}$ | ($i$, $m$) |
+| $b_{\text{down}}$ | ($m$, 1) |
+
+Crucially, **$W_{\text{down}}$ *contains* the monosemantic features** - each row of $W_{\text{down}}$ is a monosemantic feature.
+
 ### Notes
 - "we periodically check for neurons which have not fired in a significant number of steps and reset the encoder weights on the dead neurons to match data points that the autoencoder does not currently represent well."
 - How to know it's working
@@ -65,6 +99,8 @@ Specs (from [Problem Setup](https://transformer-circuits.pub/2023/monosemantic-f
 [ [demo](https://transformer-circuits.pub/2023/monosemantic-features/vis/a1.html) ]
 - we'll teat each box as a product feature that we can add incrementally.
 - top priorities: histogram of max pos and neg logits, and autointerp.
+
+![alt text](image-1.png)
 
 ### The `TextInspector` tool
 [ [demo](https://transformer-circuits.pub/2023/monosemantic-features/vis/a1-abstract.html) ]
@@ -121,5 +157,19 @@ so we're going to want to clamp strings that are impermissible under the context
 
 
 #### Activation Specificity
+> Does the feature only activate when the string is related?
 
-#### 
+We plot the distribution of feature activations weighted by activation level. Most of the magnitude of activation provided by this feature comes from dataset examples which are in Arabic script.
+
+![alt text](image.png)
+
+#### Activation Sensitivity
+> When the string is related, does the feature activate?
+
+Our target is to reproduce this finding: 
+**"we find a Pearson correlation of 0.74 between the activity of our feature and the activity of the Arabic script proxy (thresholded at 0), over a dataset of 40 million tokens."**
+
+#### Feature Downstream Effects
+
+!!! This is the most important part of the paper, because this is how we create clamping !!!
+
