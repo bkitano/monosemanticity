@@ -19,12 +19,20 @@ Why is this cool? Right now, if you want the model to do something or perform so
 
 And, again, *the model is computing all of these without you having to prompt for it*.
 
+## Example use cases
+
+Here's a feature from Claude Sonnet that activates when a function has a code error.
+![alt text](image-4.png)
+
+You could imagine in your code editor that the syntax highlighter would also light up to highlight the error, before you've even run the code.
+
+
 # 1. Reproduce "Towards Monosemanticity"
 ## 1a. Train a single-layer transformer on the Pile dataset.
 [ [Original paper](https://transformer-circuits.pub/2023/monosemantic-features/index.html#setup-transformer) ]
 
 ### Necessity
-Is this really necessary, or can I take a pretrained model with multiple layers and just use the last layer?
+Is this really necessary, or can I take a pretrained model with multiple layers and just use the last layer? Based on the Scaling Monosemanticity paper, I think not.
 
 > "Note that this linear structure makes it even more likely that features should be linear. On the one hand, this means that the linear representation hypothesis is more likely to hold for this model. On the other hand, it potentially means that our results are less likely to generalize to multilayer models. Fortunately, others have studied multilayer transformers with sparse autoencoders and found interpretable linear features, which gives us more confidence that what we see in the one-layer model indeed generalizes."
 
