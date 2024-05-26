@@ -21,10 +21,18 @@ And, again, *the model is computing all of these without you having to prompt fo
 
 ## Example use cases
 
+### Code editor
 Here's a feature from Claude Sonnet that activates when a function has a code error.
 ![alt text](image-4.png)
 
 You could imagine in your code editor that the syntax highlighter would also light up to highlight the error, before you've even run the code.
+
+### Notion / Topic Modeling
+Currently if you're doing RAG you're probably embedding chunks/the whole document then storing the embeddings in a vector database. To use feature activations, then rather than chunking and embedding the chunks, you would instead store the document as a dictionary of tokens and their feature activations. With document feature activations, you can do things like:
+- get per-token relevance scores for search (previously computationally prohibitive)
+- sort documents semantically without recomputing dot products (eg, "show me all the documents that are about X" would just index on the most related feature activations)
+
+
 
 
 # 1. Reproduce "Towards Monosemanticity"
