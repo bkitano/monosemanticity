@@ -2,8 +2,24 @@
 
 # Project Outline
 1. Reproduce [Towards Monosemanticity](https://transformer-circuits.pub/2023/monosemantic-features/index.html)
+2. Reproduce [Scaling Monosemanticity](https://transformer-circuits.pub/2024/scaling-monosemanticity/)
 
-# 1. Reproduce Towards Monosemanticity
+# Why clamp?
+- **Interpretability**: we can understand the model's behavior by examining the effect of clamping on the model's predictions.
+- **Steerability**: we can control the model's behavior by clamping features that we want to be more or less active.
+    - "Golden Gate Bridge" Claude
+- **Usability**: feature activation represents a new model affordance that can be used to extract information from the model. 
+    - Detect errors in code compilation
+
+Why is this cool? Right now, if you want the model to do something or perform some kind of analysis, you ask/prompt it. But the key insight of interpretability is that *the model is computating activations across all features while generating responses, including the ones that you're not asking for*, and that's free information. These activations include extremely useful and highly abstract details such as:
+
+- Will this code compile?
+- What language is this?
+- What is the sentiment of this text?
+
+And, again, *the model is computing all of these without you having to prompt for it*.
+
+# 1. Reproduce "Towards Monosemanticity"
 ## 1a. Train a single-layer transformer on the Pile dataset.
 [ [Original paper](https://transformer-circuits.pub/2023/monosemantic-features/index.html#setup-transformer) ]
 
@@ -202,3 +218,12 @@ Our target is to reproduce this finding:
 ![alt text](image-2.png)
 
 So in this example, there's a lot of blue, because the context of DNA feature improves the predictive capacity for the next token, and if we ablate the DNA feature down, the loss increases. 
+
+# 2. Reproduce "Scaling Monosemanticity"
+
+> "For clarity, this is the 3.0 version of Claude 3 Sonnet, released March 4, 2024. It is the exact model in production as of the writing of this paper. It is the finetuned model, not the base pretrained model (although our method also works on the base model)."
+
+> "In this work, we focused on applying SAEs to residual stream activations halfway through the model (i.e. at the “middle layer”). We made this choice for several reasons. First, the residual stream is smaller than the MLP layer, making SAE training and inference computationally cheaper. Second, focusing on the residual stream in theory helps us mitigate an issue we call “cross-layer superposition” (see Limitations for more discussion). We chose to focus on the middle layer of the model because we reasoned that it is likely to contain interesting, abstract features (see e.g., 
+[11, 12, 13])."
+
+> "With this proxy, we can treat dictionary learning as a standard machine learning problem, to which we can apply the “scaling laws” framework for hyperparameter optimization (see e.g. [14, 15]). In an SAE, compute usage primarily depends on two key hyperparameters: the number of features being learned, and the number of steps used to train the autoencoder (which maps linearly to the amount of data used, as we train the SAE for only one epoch). The compute cost scales with the product of these parameters if the input dimension and other hyperparameters are held constant."
