@@ -48,8 +48,8 @@ You could clamp on features like "high school", "sycophancy", or other persona.
 > "A simple strategy for efficiently identifying causally important features for a model's output is to compute attributions, which are local linear approximations of the effect of turning a feature off at a specific location on the model's next-token prediction. 10 We also perform feature ablations, where we clamp a feature’s value to zero at a specific token position during a forward pass, which measures the full, potentially nonlinear causal effect of that feature’s activation in that position on the model output. This is much slower since it requires one forward pass for every feature that activates at each position, so we often used attribution as a preliminary step to filter the set of features to ablate. (In the case studies shown below, we do ablate every active feature for completeness, and find a 0.8 correlation between attribution and ablation effects; see appendix.)"
 
 
-# 1. Reproduce "Towards Monosemanticity"
-## 1a. Train a single-layer transformer on the Pile dataset.
+# Notes on "Towards Monosemanticity"
+## Train a single-layer transformer on the Pile dataset.
 [ [Original paper](https://transformer-circuits.pub/2023/monosemantic-features/index.html#setup-transformer) ]
 
 ### Necessity
@@ -82,7 +82,7 @@ Specs (from [Problem Setup](https://transformer-circuits.pub/2023/monosemantic-f
   > We can highly overtrain a one-layer transformer quite cheaply. We hypothesize that a very high number of training tokens may allow our model to learn cleaner representations in superposition.
 
 
-## 1b. Train a sparse autoencoder on the activations of the transformer.
+## Train a sparse autoencoder on the activations of the transformer.
 > "We think it would be very helpful if we could identify better metrics for dictionary learning solutions from sparse autoencoders trained on transformers."
 
 
@@ -159,7 +159,7 @@ $$
 
 - We want to measure and target high feature *specificity* and *sensitivity* (i.e. precision and recall).
 
-## 1c. Building interfaces to explore learned features.
+## Build interfaces to explore learned features.
 
 ### The `FeatureInspector` tool
 [ [demo](https://transformer-circuits.pub/2023/monosemantic-features/vis/a1.html) ]
@@ -171,7 +171,7 @@ $$
 ### The `TextInspector` tool
 [ [demo](https://transformer-circuits.pub/2023/monosemantic-features/vis/a1-abstract.html) ]
 
-### 1d. Investigate learned features
+### Investigate learned features
 
 Looking for: 
 1. The learned feature activates with high specificity for the hypothesized context. (When the feature is on the context is usually present.)
@@ -248,20 +248,85 @@ Our target is to reproduce this finding:
 
 So in this example, there's a lot of blue, because the context of DNA feature improves the predictive capacity for the next token, and if we ablate the DNA feature down, the loss increases. 
 
-# 2. Reproduce "Scaling Monosemanticity"
+# Reproduce "Scaling Monosemanticity"
+
+## Excerpts from the original blog post
 
 > "For clarity, this is the 3.0 version of Claude 3 Sonnet, released March 4, 2024. It is the exact model in production as of the writing of this paper. It is the finetuned model, not the base pretrained model (although our method also works on the base model)."
 
-> "In this work, we focused on applying SAEs to residual stream activations halfway through the model (i.e. at the “middle layer”). We made this choice for several reasons. First, the residual stream is smaller than the MLP layer, making SAE training and inference computationally cheaper. Second, focusing on the residual stream in theory helps us mitigate an issue we call “cross-layer superposition” (see Limitations for more discussion). We chose to focus on the middle layer of the model because we reasoned that it is likely to contain interesting, abstract features (see e.g., 
+> "In this work, we focused on applying SAEs to **residual stream activations halfway through the model (i.e. at the “middle layer”).** We made this choice for several reasons. First, the residual stream is smaller than the MLP layer, making SAE training and inference computationally cheaper. Second, focusing on the residual stream in theory helps us mitigate an issue we call “cross-layer superposition” (see Limitations for more discussion). We chose to focus on the middle layer of the model because we reasoned that it is likely to contain interesting, abstract features (see e.g., 
 [11, 12, 13])."
 
 > "With this proxy, we can treat dictionary learning as a standard machine learning problem, to which we can apply the “scaling laws” framework for hyperparameter optimization (see e.g. [14, 15]). In an SAE, compute usage primarily depends on two key hyperparameters: the number of features being learned, and the number of steps used to train the autoencoder (which maps linearly to the amount of data used, as we train the SAE for only one epoch). The compute cost scales with the product of these parameters if the input dimension and other hyperparameters are held constant."
 
 > "We find increasing coverage of concepts as we increase the number of features, though even in the 34M SAE we see evidence that the set of features we uncovered is an incomplete description of the model’s internal representations. For instance, we confirmed that Claude 3 Sonnet can list all of the London boroughs when asked, and in fact can name tens of individual streets in many of the areas. However, we could only find features corresponding to about 60% of the boroughs in the 34M SAE. This suggests that the model contains many more features than we have found, which may be able to be extracted with even larger SAEs."
 
-> "**Cross Layer Superposition.** We believe that many features in large models are in “cross-layer superposition”. That is, gradient descent often doesn't really care exactly which layer a feature is implemented in or even if it is isolated to a specific layer, allowing for features to be “smeared” across layers. 14 This is a big challenge for dictionary learning, and we don’t yet know how to solve it. This work tries to partially sidestep it by focusing on the residual stream which, as the sum of the outputs of all previous layers, we expect to suffer less from cross-layer superposition. Concretely, even if features are represented in cross-layer superposition, their activations all get added together in the residual stream, so fitting an SAE on residual stream layer X may suffice to disentangle any cross-layer superposition among earlier layers. Unfortunately, we don't think this fully avoids the problem: features which are partly represented by later layers will still be impossible to properly interpret. We believe this issue is very fundamental. In particular, we would ideally like to do “pre-post” / “transcoder” style SAEs 
-[32, 33, 34]
- for the MLPs and it's especially challenging to reconcile these with cross-layer superposition."
+> "**Cross Layer Superposition.** We believe that many features in large models are in “cross-layer superposition”. That is, gradient descent often doesn't really care exactly which layer a feature is implemented in or even if it is isolated to a specific layer, allowing for features to be “smeared” across layers. 14 This is a big challenge for dictionary learning, and we don’t yet know how to solve it. This work tries to partially sidestep it by focusing on the residual stream which, as the sum of the outputs of all previous layers, we expect to suffer less from cross-layer superposition. Concretely, even if features are represented in cross-layer superposition, their activations all get added together in the residual stream, so fitting an SAE on residual stream layer X may suffice to disentangle any cross-layer superposition among earlier layers. Unfortunately, we don't think this fully avoids the problem: features which are partly represented by later layers will still be impossible to properly interpret. We believe this issue is very fundamental. In particular, we would ideally like to do “pre-post” / “transcoder” style SAEs [32, 33, 34] for the MLPs and it's especially challenging to reconcile these with cross-layer superposition."
+
+#### Training Dataset 
+The breakdown on [training data](https://transformer-circuits.pub/2023/monosemantic-features/index.html#appendix-autoencoder-dataset):
+> "To create the dataset for autoencoder training, we evaluate the transformers on 40 million contexts from the Pile and collect the MLP activation vectors after the ReLU for each token within each context. We then sample activation vectors from 250 tokens in each context and shuffle these together so that samples within a batch come from diverse contexts. For training, we sample MLP activation vectors without replacement using a batch size of 8192. We’ve found that sampling without replacement (i.e., not repeating data) is important for optimal results. We perform 1 million update steps, using just over 8 billion activation vectors out of the total dataset size of 10 billion. We use an Adam optimizer [73] to minimize the sum of mean squared error loss and an L1 regularization penalty on the hidden layer activations of the autoencoder."
+
+40M contexts, 250 tokens per context, 8B samples, 1M update steps. 
+
+Their batch size is $8192$, and they perform ~1M update steps, aka 8B samples. 
+
+| Overcomplete factor| **Model size** |
+|-|-|
+| 8x | 2M | 
+| 16x | 4M | 
+| 32x | 8M | 
+
+So for an 8M param model they scaled their samples by 1000x, we probably want to do the same.
+
+ ### Llama-3 Particulars
+
+#### Specs
+```python
+>>> with open("Meta-Llama-3-8B/params.json", "r") as f:
+        config = json.load(f)
+    config 
+
+{
+    'dim': 4096,
+    'n_layers': 32,
+    'n_heads': 32,
+    'n_kv_heads': 8,
+    'vocab_size': 128256,
+    'multiple_of': 1024,
+    'ffn_dim_multiplier': 1.3,
+    'norm_eps': 1e-05,
+    'rope_theta': 500000.0
+}
+```
+Since the `ffn_dim_multiplier` is 1.3, the hidden size of the MLP layer is 5324. Although in `Towards Monosemanticity` they train the dictionary on the MLP layer, in `Scaling Monosemanticity` they train the dictionary on the residual stream, before the MLP layer. 
+
+Given a residual stream of size $n$ of 4096, and we're 8x-256x overcomplete, we're looking at a dictionary size $m$ of 32768-1048576.
+
+Our model has an encoder and a decoder, both with $mn$ parameters, so we're looking at a total of around $2mn$ parameters, not including biases.
+
+| Overcomplete factor | **Model size** | **Samples** | **Contexts** |
+|-|-|-|
+| 8x | 134M | 100B | 50M |
+| 16x | 268M | 200B | 100M |
+| 32x | 536M | 500B | 250M |
+
+From 40M contexts, they get 250 tokens per context, so 10B samples. For us to achieve 8x overcompleteness, we need to scale this up by 10x, so we need 100B samples. While their transformer had $d=512$, ours has $d=4096$, so we can probably get 8x more tokens/samples per context; that is, we can get 2000 tokens per context. At a target of 100B samples, we'll need 50M contexts.
+
+Fireworks is priced at $.20/1M tokens, so 100B tokens would cost $20,000, but Fireworks won't work because we need to see the model's intermediate activations.
+
+From [Parseur](https://parseur.com/blog/blog-llama3-performance-cost#:~:text=You%20need%20a%20GPU%20with,to%20run%20Llama%203%2D8B),
+
+> "We tested Llama 3-8B on Google Cloud Platform's Compute Engine with different GPUs. We used the Hugging Face Llama 3-8B model for our tests."
+
+| Machine type | vCPUs | RAM  | Nvidia GPU | VRAM | Token/s | $/month   | $/1M tokens | Tokens/month |
+|--------------|-------|------|------------|------|---------|-----------|--------------|--|
+| n1           | 8     | 52GB | T4         | 16GB | 0.43    | $482.45   | $431.82      | |
+| **g2**           | **4**     | **16GB** | **L4**         | **24GB** | **12.75**   | **$579.73**   | **$17.54**       | 33M |
+| n1           | 8     | 52GB | P100       | 16GB | 1.41    | $1121.20  | $306.78      | |
+| n1           | 4     | 15GB | V100       | 16GB | 1.30    | $1447.33  | $429.52      | |
+
+It would take 3000 months on the g2/L4, which would cost $1.7M.
 
 ### Searching for Specific Features
 
@@ -271,7 +336,7 @@ So in this example, there's a lot of blue, because the context of DNA feature im
 ## FAQ
 ### What is the "residual stream"?
 
-The residual stream is the sum of the outputs of all previous layers. It's the output of the residual block, which is the sum of the input and the output of the attention block.
+The residual stream is the sum of the outputs of all previous layers. It's the output of the residual block, which is the sum of the input and the output of the attention block, but before we pass the output through the MLP layer that bridges the attention blocks.
 
 In a transformer block, 
 ```python
