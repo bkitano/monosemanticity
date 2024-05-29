@@ -306,7 +306,7 @@ Given a residual stream of size $n$ of 4096, and we're 8x-256x overcomplete, we'
 Our model has an encoder and a decoder, both with $mn$ parameters, so we're looking at a total of around $2mn$ parameters, not including biases.
 
 | Overcomplete factor | **Model size** | **Samples** | **Contexts** |
-|-|-|-|
+|-|-|-|-|
 | 8x | 134M | 100B | 50M |
 | 16x | 268M | 200B | 100M |
 | 32x | 536M | 500B | 250M |
