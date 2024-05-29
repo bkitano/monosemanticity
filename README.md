@@ -27,12 +27,25 @@ Here's a feature from Claude Sonnet that activates when a function has a code er
 
 You could imagine in your code editor that the syntax highlighter would also light up to highlight the error, before you've even run the code.
 
+![alt text](image-5.png)
+
 ### Notion / Topic Modeling
 Currently if you're doing RAG you're probably embedding chunks/the whole document then storing the embeddings in a vector database. To use feature activations, then rather than chunking and embedding the chunks, you would instead store the document as a dictionary of tokens and their feature activations. With document feature activations, you can do things like:
 - get per-token relevance scores for search (previously computationally prohibitive)
-- sort documents semantically without recomputing dot products (eg, "show me all the documents that are about X" would just index on the most related feature activations)
+- sort documents semantically without recomputing dot products (ie sorting by feature activations): you could instead "browse" the documents by feature activations, or map queries to a key subset of feature activations.
 
+### Auditable generation
+You could feasibly use this to mass surveil activations of the model on specific topics. And you'd get this without having to prompt the model for it, instead you'd get it at runtime.
 
+### Personas
+You could clamp on features like "high school", "sycophancy", or other persona. 
+![alt text](image-7.png)
+
+## What about the feature vectors?
+- We can cluster features by their feature vectors $d_i$, which helps make them explorable.
+
+### Activation vs Attribution
+> "A simple strategy for efficiently identifying causally important features for a model's output is to compute attributions, which are local linear approximations of the effect of turning a feature off at a specific location on the model's next-token prediction. 10 We also perform feature ablations, where we clamp a feature’s value to zero at a specific token position during a forward pass, which measures the full, potentially nonlinear causal effect of that feature’s activation in that position on the model output. This is much slower since it requires one forward pass for every feature that activates at each position, so we often used attribution as a preliminary step to filter the set of features to ablate. (In the case studies shown below, we do ablate every active feature for completeness, and find a 0.8 correlation between attribution and ablation effects; see appendix.)"
 
 
 # 1. Reproduce "Towards Monosemanticity"
@@ -243,3 +256,47 @@ So in this example, there's a lot of blue, because the context of DNA feature im
 [11, 12, 13])."
 
 > "With this proxy, we can treat dictionary learning as a standard machine learning problem, to which we can apply the “scaling laws” framework for hyperparameter optimization (see e.g. [14, 15]). In an SAE, compute usage primarily depends on two key hyperparameters: the number of features being learned, and the number of steps used to train the autoencoder (which maps linearly to the amount of data used, as we train the SAE for only one epoch). The compute cost scales with the product of these parameters if the input dimension and other hyperparameters are held constant."
+
+> "We find increasing coverage of concepts as we increase the number of features, though even in the 34M SAE we see evidence that the set of features we uncovered is an incomplete description of the model’s internal representations. For instance, we confirmed that Claude 3 Sonnet can list all of the London boroughs when asked, and in fact can name tens of individual streets in many of the areas. However, we could only find features corresponding to about 60% of the boroughs in the 34M SAE. This suggests that the model contains many more features than we have found, which may be able to be extracted with even larger SAEs."
+
+> "**Cross Layer Superposition.** We believe that many features in large models are in “cross-layer superposition”. That is, gradient descent often doesn't really care exactly which layer a feature is implemented in or even if it is isolated to a specific layer, allowing for features to be “smeared” across layers. 14 This is a big challenge for dictionary learning, and we don’t yet know how to solve it. This work tries to partially sidestep it by focusing on the residual stream which, as the sum of the outputs of all previous layers, we expect to suffer less from cross-layer superposition. Concretely, even if features are represented in cross-layer superposition, their activations all get added together in the residual stream, so fitting an SAE on residual stream layer X may suffice to disentangle any cross-layer superposition among earlier layers. Unfortunately, we don't think this fully avoids the problem: features which are partly represented by later layers will still be impossible to properly interpret. We believe this issue is very fundamental. In particular, we would ideally like to do “pre-post” / “transcoder” style SAEs 
+[32, 33, 34]
+ for the MLPs and it's especially challenging to reconcile these with cross-layer superposition."
+
+### Searching for Specific Features
+
+[Colab](https://colab.research.google.com/drive/1-zTC0lVCk2pBXgERpocC63rkjSgZPt3m)
+
+# Appendix
+## FAQ
+### What is the "residual stream"?
+
+The residual stream is the sum of the outputs of all previous layers. It's the output of the residual block, which is the sum of the input and the output of the attention block.
+
+In a transformer block, 
+```python
+# add RMSNorm and residual conncection
+class LlamaBlock(nn.Module):
+    def __init__(self, config):
+        super().__init__()
+        self.config = config
+
+        self.rms = RMSNorm((config['context_window'], config['d_model']))
+        
+        self.attention = RoPEMaskedMultiheadAttention(config)
+        self.feedforward = nn.Sequential(
+            nn.Linear(config['d_model'], config['d_model']),
+            SwiGLU(config['d_model']),
+        )
+
+    def forward(self, x):
+        x = self.rms(x) # rms pre-normalization
+        x = x + self.attention(x)
+
+        x = self.rms(x) # rms pre-normalization
+        x = x + self.feedforward(x) # residual connection
+        return x
+```
+
+# References
+- [Working example on GPT-2](https://colab.research.google.com/drive/1-zTC0lVCk2pBXgERpocC63rkjSgZPt3m)
