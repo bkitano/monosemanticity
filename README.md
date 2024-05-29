@@ -301,7 +301,7 @@ So for an 8M param model they scaled their samples by 1000x, we probably want to
 ```
 Since the `ffn_dim_multiplier` is 1.3, the hidden size of the MLP layer is 5324. Although in `Towards Monosemanticity` they train the dictionary on the MLP layer, in `Scaling Monosemanticity` they train the dictionary on the residual stream, before the MLP layer. 
 
-Given a residual stream of size $n$ of 4096, and we're 8x-256x overcomplete, we're looking at a dictionary size $m$ of 32768-1048576.
+Given a residual stream of size $n$ of 4096, and we're 8x-256x overcomplete, we're looking at a dictionary size $m$ of 32k-1M features.
 
 Our model has an encoder and a decoder, both with $mn$ parameters, so we're looking at a total of around $2mn$ parameters, not including biases.
 
