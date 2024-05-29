@@ -311,7 +311,7 @@ Our model has an encoder and a decoder, both with $mn$ parameters, so we're look
 | 16x | 268M | 200B | 100M |
 | 32x | 536M | 500B | 250M |
 
-From 40M contexts, they get 250 tokens per context, so 10B samples. For us to achieve 8x overcompleteness, we need to scale this up by 10x, so we need 100B samples. While their transformer had $d=512$, ours has $d=4096$, so we can probably get 8x more tokens/samples per context; that is, we can get 2000 tokens per context. At a target of 100B samples, we'll need 50M contexts.
+From 40M contexts, they get 250 tokens per context, so 10B samples. For us to achieve 8x overcompleteness, we need to scale this up by 10x, so we need 100B samples. While their transformer had $d=512$, ours has $d=4096$, so we can probably get 8x more tokens/samples per context; that is, we can get 2000 tokens per context. At a target of 100B samples (aka token activations), we'll need 50M contexts.
 
 Fireworks is priced at $.20/1M tokens, so 100B tokens would cost $20,000, but Fireworks won't work because we need to see the model's intermediate activations.
 
