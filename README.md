@@ -326,7 +326,7 @@ From [Parseur](https://parseur.com/blog/blog-llama3-performance-cost#:~:text=You
 | n1           | 8     | 52GB | P100       | 16GB | 1.41    | $1121.20  | $306.78      | |
 | n1           | 4     | 15GB | V100       | 16GB | 1.30    | $1447.33  | $429.52      | |
 
-It would take 3000 months on the g2/L4, which would cost $1.7M.
+It would take 3000 compute-months on the g2/L4, which would cost $1.7M.
 
 ### Searching for Specific Features
 
