@@ -23,11 +23,11 @@ And, again, *the model is computing all of these without you having to prompt fo
 
 ### Code editor
 Here's a feature from Claude Sonnet that activates when a function has a code error.
-![alt text](image-4.png)
+![alt text](images/image-4.png)
 
 You could imagine in your code editor that the syntax highlighter would also light up to highlight the error, before you've even run the code.
 
-![alt text](image-5.png)
+![alt text](images/image-5.png)
 
 ### Notion / Topic Modeling
 Currently if you're doing RAG you're probably embedding chunks/the whole document then storing the embeddings in a vector database. To use feature activations, then rather than chunking and embedding the chunks, you would instead store the document as a dictionary of tokens and their feature activations. With document feature activations, you can do things like:
@@ -39,7 +39,7 @@ You could feasibly use this to mass surveil activations of the model on specific
 
 ### Personas
 You could clamp on features like "high school", "sycophancy", or other persona. 
-![alt text](image-7.png)
+![alt text](images/image-7.png)
 
 ## What about the feature vectors?
 - We can cluster features by their feature vectors $d_i$, which helps make them explorable.
@@ -166,7 +166,7 @@ $$
 - we'll teat each box as a product feature that we can add incrementally.
 - top priorities: histogram of max pos and neg logits, and autointerp.
 
-![alt text](image-1.png)
+![alt text](images/image-1.png)
 
 ### The `TextInspector` tool
 [ [demo](https://transformer-circuits.pub/2023/monosemantic-features/vis/a1-abstract.html) ]
@@ -228,7 +228,7 @@ so we're going to want to clamp strings that are impermissible under the context
 
 We plot the distribution of feature activations weighted by activation level. Most of the magnitude of activation provided by this feature comes from dataset examples which are in Arabic script.
 
-![alt text](image.png)
+![alt text](images/image.png)
 
 #### Activation Sensitivity
 > When the string is related, does the feature activate?
@@ -248,7 +248,7 @@ Our target is to reproduce this finding:
 
 Would be interesting to add an orthogonality loss on the features.
 
-![alt text](image-2.png)
+![alt text](images/image-2.png)
 
 So in this example, there's a lot of blue, because the context of DNA feature improves the predictive capacity for the next token, and if we ablate the DNA feature down, the loss increases. 
 
